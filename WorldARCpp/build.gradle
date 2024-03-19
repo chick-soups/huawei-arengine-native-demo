@@ -1,0 +1,74 @@
+apply plugin: 'com.android.application'
+
+def arengine_libpath = "${projectDir}/src/main/jniLibs/"
+// Create a configuration to mark which aars to extract .so files from
+configurations { natives }
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.huawei.arengine.demos.cworld"
+
+        minSdkVersion 26
+        targetSdkVersion 30
+        versionCode 1
+        versionName rootProject.ext.versionName
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11", "-Wall"
+                arguments "-DANDROID_STL=c++_static",
+                        "-DARENGINE_LIBPATH=${arengine_libpath}/jni"
+            }
+        }
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.aar'], dir: 'libs')
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.huawei.hms:arenginesdk:3.7.0.3'
+    natives 'com.huawei.hms:arenginesdk:3.7.0.3'
+}
+
+// Extracts the shared libraries from aars in the natives configuration.
+// This is done so that NDK builds can access these libraries.
+task extractNativeLibrariesArEngine() {
+    outputs.upToDateWhen { false }
+    doFirst {
+        configurations.natives.files.each { f ->
+            copy {
+                from zipTree(f)
+                into arengine_libpath
+                include "jni/**/*"
+            }
+        }
+    }
+}
+
+tasks.whenTaskAdded {
+    task-> if (task.name.contains("external") && !task.name.contains("Clean")) {
+        task.dependsOn(extractNativeLibrariesArEngine)
+    }
+}
+
