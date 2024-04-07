@@ -5,6 +5,7 @@ add_library(huawei_arengine_ndk SHARED IMPORTED)
 set_target_properties(huawei_arengine_ndk PROPERTIES IMPORTED_LOCATION
         "${ARENGINE_LIBPATH}/${ANDROID_ABI}/libhuawei_arengine_ndk.so")
 
+add_subdirectory(src/main/cpp/glm-1.0.1)
 # This is the main app library.
 add_library(worldAr_native SHARED
         src/main/cpp/rendering/world_background_renderer.cpp
@@ -18,7 +19,8 @@ add_library(worldAr_native SHARED
 
 target_include_directories(worldAr_native PRIVATE
         src/main/cpp
-        ${ANDROID_NDK}/sources/third_party/vulkan/src/libs/glm)
+        src/main/cpp/glm-1.0.1/glm)
+target_compile_definitions(worldAr_native PRIVATE GLM_ENABLE_EXPERIMENTAL)
 
 target_link_libraries(worldAr_native
         android

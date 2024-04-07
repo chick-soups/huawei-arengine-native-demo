@@ -1,30 +1,32 @@
 apply plugin: 'com.android.application'
 
-def arengine_libpath = "${projectDir}/src/main/jniLibs/"
+def arengine_libpath = "${projectDir}/src/main/libs/"
 // Create a configuration to mark which aars to extract .so files from
 configurations { natives }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    namespace 'com.huawei.arengine.demos.cworld'
+    ndkVersion "23.1.7779620"
+    compileSdk 33
+
 
     defaultConfig {
         applicationId "com.huawei.arengine.demos.cworld"
 
         minSdkVersion 26
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 1
         versionName rootProject.ext.versionName
 
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++11", "-Wall"
+                cppFlags "-std=c++17", "-Wall"
                 arguments "-DANDROID_STL=c++_static",
                         "-DARENGINE_LIBPATH=${arengine_libpath}/jni"
             }
         }
         ndk {
-            abiFilters "armeabi-v7a"
+            abiFilters "armeabi-v7a","arm64-v8a"
         }
     }
 
@@ -36,6 +38,7 @@ android {
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
+            version "3.18.1"
         }
     }
     compileOptions {
@@ -47,8 +50,8 @@ android {
 dependencies {
     implementation fileTree(include: ['*.aar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.huawei.hms:arenginesdk:3.7.0.3'
-    natives 'com.huawei.hms:arenginesdk:3.7.0.3'
+    implementation 'com.huawei.hms:arenginesdk:4.0.0.5'
+    natives 'com.huawei.hms:arenginesdk:4.0.0.5'
 }
 
 // Extracts the shared libraries from aars in the natives configuration.
